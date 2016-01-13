@@ -12,6 +12,14 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using Windows.Storage.Pickers;
+using Windows.Storage;
+using Windows.UI.ViewManagement;
+using Windows.UI.Popups;
+using Windows.UI.Xaml.Media.Imaging;
+using Microsoft.ProjectOxford.Vision.Contract;
+using Windows.Storage.Streams;
+using Windows.Graphics.Imaging;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -23,6 +31,12 @@ namespace MenuReader
     public sealed partial class MainPage : Page
     {
         private CameraAPI camera;
+        private Stream idPhoto;
+        private Stream portraitPhoto;
+        private SoftwareBitmapSource idPhotoBitmap;
+        private SoftwareBitmapSource portraitPhotoBitmap;
+        private SoftwareBitmapSource htmlPhotoBitmap;
+        private SoftwareBitmapSource bitmapSource;
 
         public MainPage()
         {
@@ -30,10 +44,79 @@ namespace MenuReader
             camera = new CameraAPI();
         }
 
-        private async void PhotoButton_Click(object sender, RoutedEventArgs e)
+        private async void CameraButton_Click(object sender, RoutedEventArgs e)
         {
             await camera.TakePhoto();
-            Stream photo = camera.getPhoto();
+        }
+
+        private async void BrowsePhotoButton_Click(object sender, RoutedEventArgs e)
+        {
+            FileOpenPicker openPicker = new FileOpenPicker();
+            openPicker.ViewMode = PickerViewMode.Thumbnail;
+            openPicker.SuggestedStartLocation = PickerLocationId.PicturesLibrary;
+            openPicker.FileTypeFilter.Add(".jpg");
+            openPicker.FileTypeFilter.Add(".jpeg");
+            openPicker.FileTypeFilter.Add(".png");
+
+            StorageFile file = await openPicker.PickSingleFileAsync();
+            if (file != null)
+            {
+                //ShowMessage("Picked: " + file.DisplayName);
+                camera.StorePhoto(file);
+            }
+            else
+            {
+                ShowMessage("Operation cancelled.");
+            }
+        }
+
+        private void LoadIDButton_Click(object sender, RoutedEventArgs e)
+        {
+            idPhotoBitmap = camera.getPhotoAsSoftwareBitmapSource();
+            idPhoto = camera.getPhotoAsStream();
+            IDPhoto.Source = idPhotoBitmap;
+        }
+
+        private void LoadPortraitButton_Click(object sender, RoutedEventArgs e)
+        {
+            portraitPhotoBitmap = camera.getPhotoAsSoftwareBitmapSource();
+            portraitPhoto = camera.getPhotoAsStream();
+            PortraitPhoto.Source = portraitPhotoBitmap;
+        }
+
+        private void GenerateHTMLButton_Click(object sender, RoutedEventArgs e)
+        {
+            HtmlGenerator gen = new HtmlGenerator("Test", idPhoto, portraitPhoto);
+            gen.GenerateHtml();
+            //TODO: Link Html software photo bitmap here
+            HtmlPhoto.Source = null;
+        }
+
+        private async void BrowseButton_Click(object sender, RoutedEventArgs e)
+        {
+            FileOpenPicker openPicker = new FileOpenPicker();
+            openPicker.ViewMode = PickerViewMode.Thumbnail;
+            openPicker.SuggestedStartLocation = PickerLocationId.PicturesLibrary;
+            openPicker.FileTypeFilter.Add(".jpg");
+            openPicker.FileTypeFilter.Add(".jpeg");
+            openPicker.FileTypeFilter.Add(".png");
+
+            StorageFile file = await openPicker.PickSingleFileAsync();
+            if (file != null)
+            {
+                ShowMessage("Picked: " + file.DisplayName);
+                camera.StorePhoto(file);
+            }
+            else
+            {
+                ShowMessage("Operation cancelled.");
+            }
+        }
+
+        private async void ShowMessage(string msg)
+        {
+            MessageDialog dialog = new MessageDialog(msg);
+            await dialog.ShowAsync();
         }
     }
 }
