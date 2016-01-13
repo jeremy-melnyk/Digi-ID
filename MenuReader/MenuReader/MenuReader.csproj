@@ -99,8 +99,11 @@
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="CameraAPI.cs" />
+    <Compile Include="CardEntity.cs" />
     <Compile Include="ClientError.cs" />
     <Compile Include="ClientException.cs" />
+    <Compile Include="HtmlGenerator.cs" />
+    <Compile Include="ImageReader.cs" />
     <Compile Include="IVisionServiceClient.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
