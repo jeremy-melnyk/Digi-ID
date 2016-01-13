@@ -86,8 +86,8 @@ namespace MenuReader
 
         private void GenerateHTMLButton_Click(object sender, RoutedEventArgs e)
         {
-            HtmlGenerator gen = new HtmlGenerator("Test", idPhoto, portraitPhoto);
-            gen.GenerateHtml();
+            HtmlGenerator gen = new HtmlGenerator(idPhoto, portraitPhoto);
+            gen.GenerateHtmlAsync();
             //TODO: Link Html software photo bitmap here
             HtmlPhoto.Source = null;
         }
