@@ -20,40 +20,45 @@ namespace MenuReader
         /// <summary>
         /// Creates an HtmlGenerator.
         /// </summary>
-        /// <param name="fileName">File name to be added to Documents library.</param>
         /// <param name="card">Card stream that will be OCR'd</param>
         /// <param name="replacementPicture">Picture to put as replacement in generated html.</param>
-        public HtmlGenerator(string fileName, Stream card, Stream replacementPicture)
+        public HtmlGenerator(Stream card, Stream replacementPicture)
         {
-            setFilePath(fileName);
-
+            this.htmlFile = ApplicationData.Current.TemporaryFolder.CreateFileAsync("TEMP_HTML.html", CreationCollisionOption.ReplaceExisting).AsTask().Result;
             this.ReplacementPicture = replacementPicture;
             this.Card = card;
         }
 
-        public void setFilePath(string fileName)
+        public async void GenerateHtmlAsync()
         {
-            StorageFolder storageFolder = KnownFolders.DocumentsLibrary;
-            this.htmlFile = storageFolder.CreateFileAsync(fileName, CreationCollisionOption.ReplaceExisting).AsTask().Result;
-        }
-
-        public void GenerateHtml()
-        {
-            if (htmlFile == null || Card == null|| ReplacementPicture == null)
+            if (htmlFile == null || Card == null || ReplacementPicture == null)
             {
                 throw new MissingMemberException("File name, card or replacement picture not set.");
             }
             // TODO: Call private methods in appropriate order, using ImageReader to get OCR.
+            Task t = initFileAsync();
+            await t;
+
+            t = endFileAsync();
+            await t;
         }
 
-        private void initFile()
+        private async Task initFileAsync()
         {
-            // TODO: Code to generate <html> and all
+            string init = "<html>\n" +
+                          "  <head>\n" +
+                          "    <title>Your new card!</title>\n" +
+                          "  </head>\n" +
+                          "  <body>\n" +
+                          "    <h1>Never forget: with great power comes great responsibility</h1>\n";
+            await FileIO.WriteTextAsync(this.htmlFile, init);
         }
 
-        private void endFile()
+        private async Task endFileAsync()
         {
-            // TODO: Close the file i.e. </body> and </html>
+            string close = "  </body>\n</html>";
+            await FileIO.AppendTextAsync(this.htmlFile, close);
+
             this.htmlFile = null;
             this.ReplacementPicture = null;
             this.Card = null;
