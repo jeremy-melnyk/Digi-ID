@@ -29,7 +29,6 @@ namespace MenuReader
                 if (value != null)
                 {
                     this.photoResultsTask = this.visionClient.RecognizeTextAsync(value);
-                    this.photoResultsTask.Start();
                 }
                 this._photo = value;
             }
@@ -41,9 +40,9 @@ namespace MenuReader
             this.photo = photo;
         }
 
-        public OcrResults GetImageAnalysisResults()
+        public async Task<OcrResults> GetImageAnalysisResultsAsync()
         {
-            return photoResultsTask.Result;
+            return await photoResultsTask;
         }
     }
 }

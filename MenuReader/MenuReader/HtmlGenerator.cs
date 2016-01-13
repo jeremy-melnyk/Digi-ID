@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using Microsoft.ProjectOxford.Vision.Contract;
 using Windows.Storage;
 
 namespace MenuReader
@@ -38,6 +38,9 @@ namespace MenuReader
             // TODO: Call private methods in appropriate order, using ImageReader to get OCR.
             Task t = initFileAsync();
             await t;
+
+            ImageReader imageReader = new ImageReader(this.Card);
+            OcrResults results = await imageReader.GetImageAnalysisResultsAsync();
 
             t = endFileAsync();
             await t;
