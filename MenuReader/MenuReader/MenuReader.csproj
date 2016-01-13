@@ -102,6 +102,7 @@
     <Compile Include="CardEntity.cs" />
     <Compile Include="ClientError.cs" />
     <Compile Include="ClientException.cs" />
+    <Compile Include="FaceAPI.cs" />
     <Compile Include="HtmlGenerator.cs" />
     <Compile Include="ImageReader.cs" />
     <Compile Include="IVisionServiceClient.cs" />

@@ -32,6 +32,7 @@
                 VerticalAlignment="Bottom" Content="Generate HTML"                
                 Click="GenerateHTMLButton_Click" Height="80" Width="121" Canvas.Top="673" Canvas.Left="-5">
             </Button>
+            <Rectangle Width="{Binding faceAPI.width, Mode=TwoWay}" Height="{Binding faceAPI.height, Mode=TwoWay}" Stroke="Red"/>
         </Canvas>
     </Grid>
 </Page>

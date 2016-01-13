@@ -38,10 +38,13 @@ namespace MenuReader
         private SoftwareBitmapSource htmlPhotoBitmap;
         private SoftwareBitmapSource bitmapSource;
 
+        private FaceAPI faceAPI;
+
         public MainPage()
         {
             this.InitializeComponent();
             camera = new CameraAPI();
+            faceAPI = new FaceAPI();
         }
 
         private async void CameraButton_Click(object sender, RoutedEventArgs e)
