@@ -9,7 +9,6 @@ using Windows.Storage;
 
 namespace MenuReader
 {
-
     class HtmlGenerator
     {
         private StorageFile htmlFile;
@@ -55,7 +54,7 @@ namespace MenuReader
                     foreach (Word word in line.Words)
                     {
                         bBox = new BoundaryBox(word.BoundingBox);
-                        string htmlWord = "<span style=\"position: absolute; " +
+                        string htmlWord = "      <span style=\"position: absolute; " +
                                                         "left: " + bBox.x + "px; " +
                                                         "top: " + bBox.y + "px; " +
                                                         "width: " + bBox.Width + "px; " +
@@ -67,7 +66,7 @@ namespace MenuReader
                 }
             }
             // TODO: Add picture
-            await FileIO.AppendTextAsync(this.htmlFile, "</div>");
+            await FileIO.AppendTextAsync(this.htmlFile, "    </div>\n");
             t = endFileAsync();
             await t;
         }
@@ -78,7 +77,7 @@ namespace MenuReader
                           "  <head>\n" +
                           "    <title>Your new card!</title>\n" +
                           "  </head>\n" +
-                          "  <body>\n" +
+                          "  <body style=\"font-family: Calibri;\">\n" +
                           "    <h1>Never forget: with great power comes great responsibility</h1>\n";
             await FileIO.WriteTextAsync(this.htmlFile, init);
 
