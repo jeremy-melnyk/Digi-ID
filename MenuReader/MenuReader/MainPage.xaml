@@ -7,32 +7,78 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <Canvas x:Name="CameraCanvas" Width="2160" Height="1440" Background="White" Margin="-395,-444,-1125,-636">
-            <Image x:Name="IDPhoto" Height="345" Width="495" Stretch="Uniform" Canvas.Left="331" Canvas.Top="139"/>
-            <Image x:Name="PortraitPhoto" Height="450" Width="400" Stretch="Uniform" Canvas.Left="878" Canvas.Top="139"/>
-            <Image x:Name="HtmlPhoto" Height="345" Width="495" Stretch="Uniform" Canvas.Left="331" Canvas.Top="545"/>
-            <Button Name="CameraButton" Click="CameraButton_Click" IsEnabled="True" Canvas.Left="131" Canvas.Top="477">
-                <Viewbox MaxHeight="80" MaxWidth="121">
-                    <SymbolIcon Symbol="Camera"/>
-                </Viewbox>
-            </Button>
-            <Button x:Name="BrowsePhotoButton"         
-                VerticalAlignment="Bottom" Content="Browse Photo"                
-                Click="BrowsePhotoButton_Click" Height="80" Width="121" Canvas.Top="477" Canvas.Left="-5"/>
-            <Button x:Name="LoadIDButton"         
-                VerticalAlignment="Bottom" Content="Load ID"                
-                Click="LoadIDButton_Click" Height="80" Width="121" Canvas.Top="581" Canvas.Left="-5">
-            </Button>
-            <Button x:Name="LoadPortraitButton"         
-                VerticalAlignment="Bottom" Content="Load Portrait"                
-                Click="LoadPortraitButton_Click" Height="80" Width="121" Canvas.Top="581" Canvas.Left="131">
-            </Button>
-            <Button x:Name="GenerateHTMLButton"         
-                VerticalAlignment="Bottom" Content="Generate HTML"                
-                Click="GenerateHTMLButton_Click" Height="80" Width="121" Canvas.Top="673" Canvas.Left="-5">
-            </Button>
-            <Rectangle Width="{Binding faceAPI.width, Mode=TwoWay}" Height="{Binding faceAPI.height, Mode=TwoWay}" Stroke="Red"/>
-        </Canvas>
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" MaxWidth="2160" MaxHeight="1440">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="70"/>
+            <RowDefinition Height="70"/>
+            <RowDefinition Height="70"/>
+            <RowDefinition Height="70"/>
+            <RowDefinition Height="70"/>
+            <RowDefinition Height="70"/>
+            <RowDefinition Height="70"/>
+            <RowDefinition Height="70"/>
+            <RowDefinition Height="70"/>
+            <RowDefinition Height="70"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="140"/>
+            <ColumnDefinition Width="140"/>
+            <ColumnDefinition Width="140"/>
+            <ColumnDefinition Width="140"/>
+            <ColumnDefinition Width="140"/>
+            <ColumnDefinition Width="140"/>
+            <ColumnDefinition Width="140"/>
+            <ColumnDefinition Width="140"/>
+            <ColumnDefinition Width="140"/>
+            <ColumnDefinition Width="140"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Button Name="CameraButton" Click="CameraButton_Click" IsEnabled="True" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" BorderBrush="Black">
+            <Viewbox>
+                <SymbolIcon Symbol="Camera"/>
+            </Viewbox>
+        </Button>
+        <Button x:Name="BrowsePhotoButton"         
+                Content="Browse Photo"
+                FontSize="20"
+                Grid.ColumnSpan="2"
+                Grid.Column="0" 
+                Grid.Row="2"
+                BorderBrush="Black"
+                Click="BrowsePhotoButton_Click" />
+        <Button x:Name="LoadIDButton"         
+                Content="Load ID"
+                FontSize="20"
+                Grid.ColumnSpan="4"
+                Grid.Column="0" 
+                Grid.Row="3"
+                BorderBrush="Black"
+                Click="LoadIDButton_Click" />
+        <Button x:Name="LoadPortraitButton"         
+                Content="Load Portrait"
+                FontSize="20"
+                Grid.ColumnSpan="4"
+                Grid.Column="0" 
+                Grid.Row="4"
+                BorderBrush="Black"
+                Click="LoadPortraitButton_Click" />
+        <Button x:Name="GenerateHTMLButton"         
+                Content="Generate HTML"
+                FontSize="20"
+                Grid.ColumnSpan="4"
+                Grid.Column="0" 
+                Grid.Row="5"
+                BorderBrush="Black"
+                Click="GenerateHTMLButton_Click" />
+        <Image x:Name="IDPhoto" Grid.Column="2" Grid.Row="1" Grid.ColumnSpan="3" Grid.RowSpan="3"/>
+        <Image x:Name="HtmlPhoto" Grid.Column="2" Grid.Row="5" Grid.ColumnSpan="3" Grid.RowSpan="3"/>
+        <Image x:Name="PortraitPhoto" Grid.Column="6" Grid.Row="1" Grid.ColumnSpan="3" Grid.RowSpan="3"/>
+        <!--             <Rectangle x:Name="FaceRect" 
+                       Width="{Binding Width, Mode=TwoWay}" 
+                       Height="{Binding Height, Mode=TwoWay}" 
+                       Canvas.Left="{Binding Left, Mode=TwoWay}"
+                       Canvas.Top="{Binding Top, Mode=TwoWay}"
+                       Stroke="Red"/> -->
     </Grid>
 </Page>
