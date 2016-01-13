@@ -21,6 +21,7 @@ namespace MenuReader
 
         private Stream photo;
         private SoftwareBitmapSource bitmapSource;
+        private SoftwareBitmap bitmap;
 
         //private LinkedList<Stream> photos;
         //private LinkedList<SoftwareBitmapSource> bitmapSources;
@@ -71,6 +72,11 @@ namespace MenuReader
             return photo;
         }
 
+        public SoftwareBitmap getPhotoAsSoftwareBitmap()
+        {
+            return bitmap;
+        }
+
         public SoftwareBitmapSource getPhotoAsSoftwareBitmapSource()
         {
             return bitmapSource;
@@ -85,7 +91,7 @@ namespace MenuReader
             ShowMessage("Photo stored.");
         }
 
-        private async Task ConvertToBGR8(Stream capturedPhoto)
+        public async Task ConvertToBGR8(Stream capturedPhoto)
         {
             IRandomAccessStream stream = capturedPhoto.AsRandomAccessStream();
             BitmapDecoder decoder = await BitmapDecoder.CreateAsync(stream);
@@ -96,6 +102,7 @@ namespace MenuReader
             SoftwareBitmapSource bitmapSource = new SoftwareBitmapSource();
             await bitmapSource.SetBitmapAsync(softwareBitmapBGR8);
             this.bitmapSource = bitmapSource;
+            this.bitmap = softwareBitmapBGR8;
         }
 
         private async void ShowMessage(string msg)

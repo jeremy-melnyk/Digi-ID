@@ -13,7 +13,7 @@ namespace MenuReader
 {
     class FaceAPI :INotifyPropertyChanged
     {
-        private readonly IFaceServiceClient faceServiceClient = new FaceServiceClient("24c5facd2c594a86afd06050f6a147c5");
+        private readonly IFaceServiceClient faceServiceClient = new FaceServiceClient("cfa91c3094b445feb7913728d5e996b3");
 
         public float width;
         public float height;
@@ -21,6 +21,14 @@ namespace MenuReader
         public float top;
 
         public event PropertyChangedEventHandler PropertyChanged;
+
+        public FaceAPI()
+        {
+            width = 0;
+            height = 0;
+            left = 0;
+            top = 0;
+        }
 
         private void NotifyPropertyChanged(string info)
         {
@@ -30,28 +38,55 @@ namespace MenuReader
             }
         }
 
-        public void setWidth(float x)
+        public float Width
         {
-            width = x;
-            NotifyPropertyChanged("width");
+            get { return width; }
+            set
+            {
+                width = value;
+                NotifyPropertyChanged("Width");
+            }
         }
 
-        public void setHeight(float x)
+
+        public float Height
         {
-            height = x;
-            NotifyPropertyChanged("height");
+            get { return height; }
+            set
+            {
+                height = value;
+                NotifyPropertyChanged("Height");
+            }
         }
 
-        public void setLeft(float x)
+        public float Left
         {
-            left = x;
-            NotifyPropertyChanged("left");
+            get { return left; }
+            set
+            {
+                left = value;
+                NotifyPropertyChanged("Left");
+            }
         }
 
-        public void setTop(float x)
+        public float Top
         {
-            top = x;
-            NotifyPropertyChanged("top");
+            get { return top; }
+            set
+            {
+                top = value;
+                NotifyPropertyChanged("Top");
+            }
+        }
+
+        public async Task DetectFace(Stream image)
+        {
+            FaceRectangle[] faceRects = await UploadAndDetectFaces(image);
+
+            if (faceRects.Length > 0)
+            {
+                PositionRectangle(faceRects[0]);
+            }
         }
 
         private async Task<FaceRectangle[]> UploadAndDetectFaces(Stream image)
@@ -68,13 +103,21 @@ namespace MenuReader
             }
         }
 
-        /*
-        public Task<Stream> extractImage(Face face)
+        
+        private void PositionRectangle(FaceRectangle faceRect)
         {
-            setWidth(face.FaceRectangle.Width);
-            setHeight(face.FaceRectangle.Height);
-            face.FaceRectangle.
+            Width = faceRect.Width;
+            Height = faceRect.Height;
+            Left = faceRect.Left;
+            Top = faceRect.Top;
         }
-        */
+
+        public void PositionRectangle(int width, int height, int left, int top)
+        {
+            Width = width;
+            Height = height;
+            Left = left;
+            Top = top;
+        }  
     }
 }
