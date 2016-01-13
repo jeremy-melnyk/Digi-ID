@@ -8,19 +8,30 @@
     mc:Ignorable="d">
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-            <Canvas x:Name="CameraCanvas" Width="2160" Height="1440">
-                <Button
-            Name="PhotoButton"
-            Click="PhotoButton_Click"
-            IsEnabled="True" 
-            Canvas.Left="128" 
-            Canvas.Top="105">
-                    <Viewbox MaxHeight="40" MaxWidth="40">
-                        <SymbolIcon Symbol="Camera"/>
-                    </Viewbox>
-                </Button>
-            </Canvas>
-        </Grid>
+        <Canvas x:Name="CameraCanvas" Width="2160" Height="1440" Background="White" Margin="-395,-444,-1125,-636">
+            <Image x:Name="IDPhoto" Height="345" Width="495" Stretch="Uniform" Canvas.Left="331" Canvas.Top="139"/>
+            <Image x:Name="PortraitPhoto" Height="450" Width="400" Stretch="Uniform" Canvas.Left="878" Canvas.Top="139"/>
+            <Image x:Name="HtmlPhoto" Height="345" Width="495" Stretch="Uniform" Canvas.Left="331" Canvas.Top="545"/>
+            <Button Name="CameraButton" Click="CameraButton_Click" IsEnabled="True" Canvas.Left="131" Canvas.Top="477">
+                <Viewbox MaxHeight="80" MaxWidth="121">
+                    <SymbolIcon Symbol="Camera"/>
+                </Viewbox>
+            </Button>
+            <Button x:Name="BrowsePhotoButton"         
+                VerticalAlignment="Bottom" Content="Browse Photo"                
+                Click="BrowsePhotoButton_Click" Height="80" Width="121" Canvas.Top="477" Canvas.Left="-5"/>
+            <Button x:Name="LoadIDButton"         
+                VerticalAlignment="Bottom" Content="Load ID"                
+                Click="LoadIDButton_Click" Height="80" Width="121" Canvas.Top="581" Canvas.Left="-5">
+            </Button>
+            <Button x:Name="LoadPortraitButton"         
+                VerticalAlignment="Bottom" Content="Load Portrait"                
+                Click="LoadPortraitButton_Click" Height="80" Width="121" Canvas.Top="581" Canvas.Left="131">
+            </Button>
+            <Button x:Name="GenerateHTMLButton"         
+                VerticalAlignment="Bottom" Content="Generate HTML"                
+                Click="GenerateHTMLButton_Click" Height="80" Width="121" Canvas.Top="673" Canvas.Left="-5">
+            </Button>
+        </Canvas>
     </Grid>
 </Page>

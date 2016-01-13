@@ -19,7 +19,15 @@ namespace MenuReader
         public readonly int MAX_RATIO_WIDTH = 16;
         public readonly int MAX_RATIO_HEIGHT = 9;
 
-        private Stream capturedPhoto;
+        private Stream photo;
+        private SoftwareBitmapSource bitmapSource;
+
+        //private LinkedList<Stream> photos;
+        //private LinkedList<SoftwareBitmapSource> bitmapSources;
+
+        public CameraAPI()
+        {
+        }
 
         public async Task TakePhoto(int ratio_width, int ratio_height)
         {
@@ -58,24 +66,36 @@ namespace MenuReader
             await TakePhoto(MAX_RATIO_WIDTH, MAX_RATIO_HEIGHT);
         }
 
-        public Stream getPhoto()
+        public Stream getPhotoAsStream()
         {
-            return capturedPhoto;
+            return photo;
         }
 
-        private async void StorePhoto(StorageFile photo)
+        public SoftwareBitmapSource getPhotoAsSoftwareBitmapSource()
+        {
+            return bitmapSource;
+        }
+
+        public async void StorePhoto(StorageFile photo)
         {
             IRandomAccessStream stream = await photo.OpenAsync(FileAccessMode.Read);
-            capturedPhoto = stream.AsStream();
+            Stream streamPhoto = stream.AsStream();
+            this.photo = streamPhoto;
+            await ConvertToBGR8(streamPhoto);
             ShowMessage("Photo stored.");
         }
 
-        private async void ConvertToBGR8(SoftwareBitmap softwareBitmap)
+        private async Task ConvertToBGR8(Stream capturedPhoto)
         {
+            IRandomAccessStream stream = capturedPhoto.AsRandomAccessStream();
+            BitmapDecoder decoder = await BitmapDecoder.CreateAsync(stream);
+            SoftwareBitmap softwareBitmap = await decoder.GetSoftwareBitmapAsync();
+
             SoftwareBitmap softwareBitmapBGR8 = SoftwareBitmap.Convert(softwareBitmap, BitmapPixelFormat.Bgra8, BitmapAlphaMode.Premultiplied);
 
             SoftwareBitmapSource bitmapSource = new SoftwareBitmapSource();
             await bitmapSource.SetBitmapAsync(softwareBitmapBGR8);
+            this.bitmapSource = bitmapSource;
         }
 
         private async void ShowMessage(string msg)
