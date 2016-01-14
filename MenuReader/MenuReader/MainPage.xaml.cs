@@ -20,6 +20,8 @@ using Windows.UI.Xaml.Media.Imaging;
 using Microsoft.ProjectOxford.Vision.Contract;
 using Windows.Storage.Streams;
 using Windows.Graphics.Imaging;
+using Windows.Media.Capture;
+using Windows.Web;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -31,18 +33,27 @@ namespace MenuReader
     public sealed partial class MainPage : Page
     {
         private CameraAPI camera;
-        private Stream idPhoto;
-        private Stream portraitPhoto;
-        private Stream htmlPhoto;
-        private SoftwareBitmapSource idPhotoBitmap;
-        private SoftwareBitmapSource portraitPhotoBitmap;
-        private SoftwareBitmapSource htmlPhotoBitmap;
+        private FaceAPI faceAPI;
+
+        private Stream photoStream;
+        private SoftwareBitmap photoBitmap;
+        private SoftwareBitmapSource photoBitmapSource;
+
+        private Stream idStream;
+        private Stream portraitStream;
+        private Stream htmlStream;
+
+        private SoftwareBitmap idBitmap;
+        private SoftwareBitmap portraitBitmap;
+        private SoftwareBitmap htmlBitmap;
+
+        private SoftwareBitmapSource idBitmapSource;
+        private SoftwareBitmapSource portraitBitmapSource;
+        private SoftwareBitmapSource htmlBitmapSource;
+
         private SoftwareBitmap htmlB;
 
-        string idPath;
         string portraitPath;
-
-        private FaceAPI faceAPI;
 
         public MainPage()
         {
@@ -53,7 +64,9 @@ namespace MenuReader
 
         private async void CameraButton_Click(object sender, RoutedEventArgs e)
         {
-            await camera.TakePhoto();
+            photoStream = await camera.TakePhoto(CameraCaptureUIPhotoFormat.Jpeg);
+            photoBitmap = await camera.ConvertToSoftwareBitmap(photoStream);
+            photoBitmapSource = await camera.ConvertToSoftwareBitmapSource(photoBitmap);
         }
 
         private async void BrowsePhotoButton_Click(object sender, RoutedEventArgs e)
@@ -68,41 +81,50 @@ namespace MenuReader
             StorageFile file = await openPicker.PickSingleFileAsync();
             if (file != null)
             {
-                camera.StorePhoto(file);
-            }
-            else
-            {
-                ShowMessage("Operation cancelled.");
+                photoStream = await camera.ConvertToStream(file);
+                photoBitmap = await camera.ConvertToSoftwareBitmap(photoStream);
+                photoBitmapSource = await camera.ConvertToSoftwareBitmapSource(photoBitmap);
             }
         }
 
-        private async void LoadIDButton_Click(object sender, RoutedEventArgs e)
+        private void LoadIDButton_Click(object sender, RoutedEventArgs e)
         {
-            idPhotoBitmap = camera.getPhotoAsSoftwareBitmapSource();
-            idPhoto = camera.getPhotoAsStream();
-            IDPhoto.Source = idPhotoBitmap;
+            idStream = photoStream;
+            idBitmap = photoBitmap;
+            idBitmapSource = photoBitmapSource;
 
-            idPath = await StorageAPI.SavePhoto(idPhoto, "ID");
+            IDPhoto.Source = idBitmapSource;
         }
 
         private async void LoadPortraitButton_Click(object sender, RoutedEventArgs e)
         {
-            portraitPhotoBitmap = camera.getPhotoAsSoftwareBitmapSource();
-            portraitPhoto = camera.getPhotoAsStream();
-            PortraitPhoto.Source = portraitPhotoBitmap;
+            portraitStream = photoStream;
+            portraitBitmap = photoBitmap;
+            portraitBitmapSource = photoBitmapSource;
 
-            portraitPath = await StorageAPI.SavePhoto(idPhoto, "Portrait");
+            PortraitPhoto.Source = portraitBitmapSource;
+
+            portraitPath = await StorageAPI.SavePhoto(portraitStream, "Portrait");
         }
 
         private void GenerateHTMLButton_Click(object sender, RoutedEventArgs e)
         {
-            htmlPhotoBitmap = camera.getPhotoAsSoftwareBitmapSource();
-            htmlPhoto = camera.getPhotoAsStream();
-            HtmlPhoto.Source = htmlPhotoBitmap;
-            htmlB = camera.getPhotoAsSoftwareBitmap();
+            /*
+            htmlStream = photoStream;
+            htmlBitmap = photoBitmap;
+            htmlBitmapSource = photoBitmapSource;
 
-            HtmlGenerator gen = new HtmlGenerator(idPhoto, htmlB.PixelWidth, htmlB.PixelHeight, portraitPath);
-            gen.GenerateHtmlAsync();      
+            HtmlPhoto.Source = htmlBitmapSource;
+            */
+
+            if (idStream != null && idBitmap != null && portraitPath != null)
+            {
+                HtmlGenerator gen = new HtmlGenerator(idStream, idBitmap.PixelWidth, idBitmap.PixelHeight, portraitPath);
+                gen.GenerateHtmlAsync();
+
+                Uri source = new Uri("ms-appdata:///Local/Packages/59ef7bd3-08e9-4e25-993d-ccf404cd019e_cj1w1dahfk9sw/TempState/TEMP_HTML.html");
+                WebView.Navigate(source);
+            }
         }
 
         private async void ShowMessage(string msg)

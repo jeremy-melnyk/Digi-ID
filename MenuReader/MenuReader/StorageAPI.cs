@@ -26,11 +26,19 @@ namespace MenuReader
 
             StorageFile file = await savePicker.PickSaveFileAsync();
 
-            using (var outputFileStream = await file.OpenStreamForWriteAsync())
+            if (file != null)
             {
-                await photo.CopyToAsync(outputFileStream);
+                using (var outputFileStream = await file.OpenStreamForWriteAsync())
+                {
+                    await photo.CopyToAsync(outputFileStream);
+                }
+
+                return file.Path;
             }
-            return file.Path;
+            else
+            {
+                return null;
+            }
         }
 
         public static async Task<string> PickPhotoPath()

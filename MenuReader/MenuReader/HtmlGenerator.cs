@@ -37,7 +37,8 @@ namespace MenuReader
         {
             if (htmlFile == null || Card == null || ReplacementPicturePath == null || CardHeight == 0 || CardWidth == 0)
             {
-                throw new MissingMemberException("File name, card or replacement picture not set.");
+                return;
+                //throw new MissingMemberException("File name, card or replacement picture not set.");
             }
 
             Task t = initFileAsync();
@@ -159,6 +160,7 @@ namespace MenuReader
                 picBBox.y = 0;
             }
 
+
             BoundingBox bBox;
 
             // Initially lowest point on card; will be modified in loop
@@ -197,7 +199,6 @@ namespace MenuReader
                     }
                     else // picture is on the right
                     {
-                    // TODO: ADAPT FOR RIGHT
                         if ((this.CardWidth - bBox.x) < minBoundary) /* Assumption: Picture for sure doesn't span this line. Now, is this line over or under picture? */
                         {
                             if (bBox.y < (0.5 * this.CardHeight)) /* current line is within top half of card. Thus, lower y. */
