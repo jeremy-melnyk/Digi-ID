@@ -16,21 +16,26 @@ namespace MenuReader
         public Stream ReplacementPicture { get; set; }
         public Stream Card { get; set; }
 
+        public int CardWidth { get; set; }
+        public int CardHeight { get; set; }
+
         /// <summary>
         /// Creates an HtmlGenerator.
         /// </summary>
         /// <param name="card">Card stream that will be OCR'd</param>
         /// <param name="replacementPicture">Picture to put as replacement in generated html.</param>
-        public HtmlGenerator(Stream card, Stream replacementPicture)
+        public HtmlGenerator(Stream card, int cardWidth, int cardHeight, Stream replacementPicture)
         {
             this.htmlFile = ApplicationData.Current.TemporaryFolder.CreateFileAsync("TEMP_HTML.html", CreationCollisionOption.ReplaceExisting).AsTask().Result;
             this.ReplacementPicture = replacementPicture;
             this.Card = card;
+            this.CardWidth = cardWidth;
+            this.CardHeight = cardHeight;
         }
 
         public async void GenerateHtmlAsync()
         {
-            if (htmlFile == null || Card == null || ReplacementPicture == null)
+            if (htmlFile == null || Card == null || ReplacementPicture == null || CardHeight == 0 || CardWidth == 0)
             {
                 throw new MissingMemberException("File name, card or replacement picture not set.");
             }
@@ -40,11 +45,13 @@ namespace MenuReader
 
             ImageReader imageReader = new ImageReader(this.Card);
             OcrResults results = await imageReader.GetImageAnalysisResultsAsync();
-            // TODO: Get image dimensions from outside
+            // Possible backgrounds
+            // http://www.userlogos.org/files/backgrounds/gtchamp7/Aqua.jpg
             string wrapperDiv = "    <div style=\"position: relative; " +
-                                                "width: " + 1024 + "px; " +
-                                                "height: " + 665 + "px; " +
-                                                "border: 1px solid black; border-radius: 10px\">\n";
+                                                "width: " + this.CardWidth + "px; " +
+                                                "height: " + this.CardHeight + "px; " +
+                                                "border: 1px solid black; border-radius: 10px; "+
+                                                "background-image: url('http://www.joycefdn.org/ar/2009/common/images/page/background/Generic_blue_background.jpg')\">\n";
             await FileIO.AppendTextAsync(this.htmlFile, wrapperDiv);
             BoundaryBox bBox;
             foreach (Region reg in results.Regions)
@@ -78,7 +85,7 @@ namespace MenuReader
                           "    <title>Your new card!</title>\n" +
                           "  </head>\n" +
                           "  <body style=\"font-family: Calibri;\">\n" +
-                          "    <h1>Never forget: with great power comes great responsibility</h1>\n";
+                          "    <div style=\"color: #2db08f; font-size: 2.3em;\">Never forget: with great power comes great responsibility...</div>\n";
             await FileIO.WriteTextAsync(this.htmlFile, init);
 
         }
@@ -91,6 +98,8 @@ namespace MenuReader
             this.htmlFile = null;
             this.ReplacementPicture = null;
             this.Card = null;
+            this.CardWidth = 0;
+            this.CardHeight = 0;
         }
 
         private void writeEntity(CardEntity cardEntity)

@@ -37,6 +37,7 @@ namespace MenuReader
         private SoftwareBitmapSource idPhotoBitmap;
         private SoftwareBitmapSource portraitPhotoBitmap;
         private SoftwareBitmapSource htmlPhotoBitmap;
+        private SoftwareBitmap htmlB;
 
         private FaceAPI faceAPI;
 
@@ -99,12 +100,13 @@ namespace MenuReader
             htmlPhotoBitmap = camera.getPhotoAsSoftwareBitmapSource();
             htmlPhoto = camera.getPhotoAsStream();
             HtmlPhoto.Source = htmlPhotoBitmap;
-            /*
-            HtmlGenerator gen = new HtmlGenerator(idPhoto, portraitPhoto);
+            htmlB = camera.getPhotoAsSoftwareBitmap();
+
+            HtmlGenerator gen = new HtmlGenerator(idPhoto, htmlB.PixelWidth, htmlB.PixelHeight, portraitPhoto);
             gen.GenerateHtmlAsync();
             //TODO: Link Html software photo bitmap here
-            HtmlPhoto.Source = null;
-            */
+            //HtmlPhoto.Source = null;
+            
         }
 
         private async void BrowseButton_Click(object sender, RoutedEventArgs e)
