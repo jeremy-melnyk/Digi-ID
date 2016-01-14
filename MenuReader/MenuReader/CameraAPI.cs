@@ -23,9 +23,6 @@ namespace MenuReader
         private SoftwareBitmapSource bitmapSource;
         private SoftwareBitmap bitmap;
 
-        //private LinkedList<Stream> photos;
-        //private LinkedList<SoftwareBitmapSource> bitmapSources;
-
         public CameraAPI()
         {
         }
@@ -45,9 +42,10 @@ namespace MenuReader
             }
 
             CameraCaptureUI captureUI = new CameraCaptureUI();
-            Size aspectRatio = new Size(ratio_width, ratio_height);
+            //Size aspectRatio = new Size(ratio_width, ratio_height);
             captureUI.PhotoSettings.Format = CameraCaptureUIPhotoFormat.Jpeg;
-            captureUI.PhotoSettings.CroppedAspectRatio = aspectRatio;
+            captureUI.PhotoSettings.AllowCropping = false;
+            //captureUI.PhotoSettings.CroppedAspectRatio = aspectRatio;
 
             StorageFile photo = await captureUI.CaptureFileAsync(CameraCaptureUIMode.Photo);
 

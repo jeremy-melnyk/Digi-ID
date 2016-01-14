@@ -124,6 +124,7 @@
     <Compile Include="Contracts\Region.cs" />
     <Compile Include="Contracts\Word.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StorageAPI.cs" />
     <Compile Include="VisionServiceClient.cs" />
   </ItemGroup>
   <ItemGroup>

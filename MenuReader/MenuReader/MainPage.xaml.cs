@@ -39,6 +39,9 @@ namespace MenuReader
         private SoftwareBitmapSource htmlPhotoBitmap;
         private SoftwareBitmap htmlB;
 
+        string idPath;
+        string portraitPath;
+
         private FaceAPI faceAPI;
 
         public MainPage()
@@ -46,9 +49,6 @@ namespace MenuReader
             this.InitializeComponent();
             camera = new CameraAPI();
             faceAPI = new FaceAPI();
-
-
-            //FaceRect.DataContext = faceAPI;
         }
 
         private async void CameraButton_Click(object sender, RoutedEventArgs e)
@@ -68,7 +68,6 @@ namespace MenuReader
             StorageFile file = await openPicker.PickSingleFileAsync();
             if (file != null)
             {
-                //ShowMessage("Picked: " + file.DisplayName);
                 camera.StorePhoto(file);
             }
             else
@@ -77,22 +76,22 @@ namespace MenuReader
             }
         }
 
-        private void LoadIDButton_Click(object sender, RoutedEventArgs e)
+        private async void LoadIDButton_Click(object sender, RoutedEventArgs e)
         {
             idPhotoBitmap = camera.getPhotoAsSoftwareBitmapSource();
             idPhoto = camera.getPhotoAsStream();
             IDPhoto.Source = idPhotoBitmap;
 
-            //await faceAPI.DetectFace(idPhoto);
+            idPath = await StorageAPI.SavePhoto(idPhoto, "ID");
         }
 
-        private void LoadPortraitButton_Click(object sender, RoutedEventArgs e)
+        private async void LoadPortraitButton_Click(object sender, RoutedEventArgs e)
         {
             portraitPhotoBitmap = camera.getPhotoAsSoftwareBitmapSource();
             portraitPhoto = camera.getPhotoAsStream();
             PortraitPhoto.Source = portraitPhotoBitmap;
 
-            //await faceAPI.DetectFace(portraitPhoto);
+            portraitPath = await StorageAPI.SavePhoto(idPhoto, "Portrait");
         }
 
         private void GenerateHTMLButton_Click(object sender, RoutedEventArgs e)
@@ -102,32 +101,8 @@ namespace MenuReader
             HtmlPhoto.Source = htmlPhotoBitmap;
             htmlB = camera.getPhotoAsSoftwareBitmap();
 
-            //HtmlGenerator gen = new HtmlGenerator(idPhoto, htmlB.PixelWidth, htmlB.PixelHeight, portraitPhoto);
-            //gen.GenerateHtmlAsync();
-            //TODO: Link Html software photo bitmap here
-            //HtmlPhoto.Source = null;
-            
-        }
-
-        private async void BrowseButton_Click(object sender, RoutedEventArgs e)
-        {
-            FileOpenPicker openPicker = new FileOpenPicker();
-            openPicker.ViewMode = PickerViewMode.Thumbnail;
-            openPicker.SuggestedStartLocation = PickerLocationId.PicturesLibrary;
-            openPicker.FileTypeFilter.Add(".jpg");
-            openPicker.FileTypeFilter.Add(".jpeg");
-            openPicker.FileTypeFilter.Add(".png");
-
-            StorageFile file = await openPicker.PickSingleFileAsync();
-            if (file != null)
-            {
-                ShowMessage("Picked: " + file.DisplayName);
-                camera.StorePhoto(file);
-            }
-            else
-            {
-                ShowMessage("Operation cancelled.");
-            }
+            HtmlGenerator gen = new HtmlGenerator(idPhoto, htmlB.PixelWidth, htmlB.PixelHeight, portraitPath);
+            gen.GenerateHtmlAsync();      
         }
 
         private async void ShowMessage(string msg)
