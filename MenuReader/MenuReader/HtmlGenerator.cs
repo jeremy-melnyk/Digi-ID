@@ -37,7 +37,8 @@ namespace MenuReader
         {
             if (htmlFile == null || Card == null || ReplacementPicturePath == null || CardHeight == 0 || CardWidth == 0)
             {
-                throw new MissingMemberException("File name, card or replacement picture not set.");
+                return;
+                //throw new MissingMemberException("File name, card or replacement picture not set.");
             }
 
             Task t = initFileAsync();
@@ -136,7 +137,7 @@ namespace MenuReader
             // place it
             //string img = "      <img src=\"" + this.ReplacementPicturePath + "\" style=\"position: absolute; " +
             //                                                                            "TODO\"/>";
-            await FileIO.WriteTextAsync(this.htmlFile, img);
+            await FileIO.AppendTextAsync(this.htmlFile, img);
         }
 
         private bool isLeftmostRegion(Region[] regions, int targetIndex)

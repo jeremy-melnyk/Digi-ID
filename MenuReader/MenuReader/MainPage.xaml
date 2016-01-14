@@ -7,7 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" MaxWidth="2160" MaxHeight="1440">
+    <Grid Background="AntiqueWhite" MaxWidth="2160" MaxHeight="1440">
         <Grid.RowDefinitions>
             <RowDefinition Height="70"/>
             <RowDefinition Height="70"/>
@@ -34,7 +34,7 @@
             <ColumnDefinition Width="140"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <TextBlock Name="StatusText" Text="Digi ID" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="30"/>
+        <TextBlock Name="StatusText" Text="Digitize your ID!" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="30" Grid.ColumnSpan="2"/>
         <Button Name="CameraButton" Click="CameraButton_Click" IsEnabled="True" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" BorderBrush="Black">
             <Viewbox>
                 <SymbolIcon Symbol="Camera"/>
@@ -75,5 +75,6 @@
         <Image x:Name="IDPhoto" Grid.Column="2" Grid.Row="1" Grid.ColumnSpan="3" Grid.RowSpan="3"/>
         <Image x:Name="HtmlPhoto" Grid.Column="2" Grid.Row="5" Grid.ColumnSpan="3" Grid.RowSpan="3"/>
         <Image x:Name="PortraitPhoto" Grid.Column="6" Grid.Row="1" Grid.ColumnSpan="3" Grid.RowSpan="3"/>
+        <WebView x:Name="WebView" Grid.Column="2" Grid.Row="5" Grid.ColumnSpan="3" Grid.RowSpan="3"/>
     </Grid>
 </Page>

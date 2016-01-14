@@ -16,94 +16,51 @@ namespace MenuReader
 {
     class CameraAPI
     {
-        public readonly int MAX_RATIO_WIDTH = 16;
-        public readonly int MAX_RATIO_HEIGHT = 9;
-
-        private Stream photo;
-        private SoftwareBitmapSource bitmapSource;
-        private SoftwareBitmap bitmap;
+        CameraCaptureUI captureUI;
 
         public CameraAPI()
         {
+            captureUI = new CameraCaptureUI();
         }
 
-        public async Task TakePhoto(int ratio_width, int ratio_height)
+        public async Task<Stream> TakePhoto(CameraCaptureUIPhotoFormat format)
         {
-            if (ratio_width > MAX_RATIO_WIDTH)
+            captureUI.PhotoSettings.Format = format;
+            StorageFile photoFile = await captureUI.CaptureFileAsync(CameraCaptureUIMode.Photo);
+
+            if (photoFile == null)
             {
-                ShowMessage("Max photo width exceeded.");
-                return;
+                await ShowMessage("Photo not taken.");
+                return null;
             }
 
-            if (ratio_height > MAX_RATIO_HEIGHT)
-            {
-                ShowMessage("Max photo height exceeded.");
-                return;
-            }
-
-            CameraCaptureUI captureUI = new CameraCaptureUI();
-            //Size aspectRatio = new Size(ratio_width, ratio_height);
-            captureUI.PhotoSettings.Format = CameraCaptureUIPhotoFormat.Jpeg;
-            captureUI.PhotoSettings.AllowCropping = false;
-            //captureUI.PhotoSettings.CroppedAspectRatio = aspectRatio;
-
-            StorageFile photo = await captureUI.CaptureFileAsync(CameraCaptureUIMode.Photo);
-
-            if (photo == null)
-            {
-                ShowMessage("Photo not taken.");
-                return;
-            }
-            else
-            {
-                StorePhoto(photo);
-            }
+            return await ConvertToStream(photoFile);
         }
 
-        public async Task TakePhoto()
+        public async Task<Stream> ConvertToStream(StorageFile photoFile)
         {
-            await TakePhoto(MAX_RATIO_WIDTH, MAX_RATIO_HEIGHT);
+            IRandomAccessStream stream = await photoFile.OpenAsync(FileAccessMode.Read);
+            return stream.AsStream();
         }
 
-        public Stream getPhotoAsStream()
+        public async Task<SoftwareBitmap> ConvertToSoftwareBitmap(Stream stream)
         {
-            return photo;
+            BitmapDecoder decoder = await BitmapDecoder.CreateAsync(stream.AsRandomAccessStream());
+            SoftwareBitmap softwareBitmap = await decoder.GetSoftwareBitmapAsync();
+            SoftwareBitmap softwareBitmapBGR8 = SoftwareBitmap.Convert(softwareBitmap, BitmapPixelFormat.Bgra8, BitmapAlphaMode.Premultiplied);
+
+            return softwareBitmapBGR8;
         }
 
-        public SoftwareBitmap getPhotoAsSoftwareBitmap()
+        public async Task<SoftwareBitmapSource> ConvertToSoftwareBitmapSource(SoftwareBitmap bitmap)
         {
-            return bitmap;
-        }
+            SoftwareBitmapSource bitmapSource = new SoftwareBitmapSource();
+            await bitmapSource.SetBitmapAsync(bitmap);
 
-        public SoftwareBitmapSource getPhotoAsSoftwareBitmapSource()
-        {
             return bitmapSource;
         }
 
-        public async void StorePhoto(StorageFile photo)
-        {
-            IRandomAccessStream stream = await photo.OpenAsync(FileAccessMode.Read);
-            Stream streamPhoto = stream.AsStream();
-            this.photo = streamPhoto;
-            await ConvertToBGR8(streamPhoto);
-            ShowMessage("Photo stored.");
-        }
-
-        public async Task ConvertToBGR8(Stream capturedPhoto)
-        {
-            IRandomAccessStream stream = capturedPhoto.AsRandomAccessStream();
-            BitmapDecoder decoder = await BitmapDecoder.CreateAsync(stream);
-            SoftwareBitmap softwareBitmap = await decoder.GetSoftwareBitmapAsync();
-
-            SoftwareBitmap softwareBitmapBGR8 = SoftwareBitmap.Convert(softwareBitmap, BitmapPixelFormat.Bgra8, BitmapAlphaMode.Premultiplied);
-
-            SoftwareBitmapSource bitmapSource = new SoftwareBitmapSource();
-            await bitmapSource.SetBitmapAsync(softwareBitmapBGR8);
-            this.bitmapSource = bitmapSource;
-            this.bitmap = softwareBitmapBGR8;
-        }
-
-        private async void ShowMessage(string msg)
+        private async Task ShowMessage(string msg)
         {
             MessageDialog dialog = new MessageDialog(msg);
             await dialog.ShowAsync();
