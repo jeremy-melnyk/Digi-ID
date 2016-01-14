@@ -105,43 +105,134 @@ namespace MenuReader
 
         private async Task writeIdPicture(Region[] regions)
         {
-            int totalLeftLength = 0, totalRightLength = 0;
+            // Calculate area between regions and left & right borders.
+            // The assumption is that the greater the area, the greater the chance that
+            // it's the area for the picture.
+            int leftArea = 0, rightArea = 0;
             BoundingBox bBox;
             for (int i = 0; i < regions.Length; i++)
             {
                 if (isLeftmostRegion(regions, i))
                 {
                     bBox = new BoundingBox(regions[i].BoundingBox);
-                    totalLeftLength += (bBox.x * bBox.Height);
+                    leftArea += (bBox.x * bBox.Height);
                 }
                 if (isRightmostRegion(regions, i))
                 {
                     bBox = new BoundingBox(regions[i].BoundingBox);
-                    totalRightLength += ((this.CardWidth - (bBox.x + bBox.Width)) * bBox.Height);
+                    rightArea += ((this.CardWidth - (bBox.x + bBox.Width)) * bBox.Height);
                 }
             }
 
-            bool pictureGoesOnTheLeft = totalLeftLength > totalRightLength ? true : false;
-            string img;
-            if (pictureGoesOnTheLeft)
-            {
-                img = "<div>PICTURE GOES ON LEFT</div>";
-            }
-            else 
-            {
-                img = "<div>PICTURE GOES ON RIGHT</div>";
-            }
+            bool pictureGoesOnTheLeft = leftArea > rightArea;
+
             // TODO: find minimal box
+            BoundingBox pictureBox = findPictureBoundaries(regions, pictureGoesOnTheLeft);
+            string img = "    <div style=\"position: absolute; " +
+                                                "width: " + pictureBox.Width + "px; " +
+                                                "height: " + pictureBox.Height + "px; " +
+                                                "border: 1px solid red; border-radius: 10px; " +
+                                                "left: " + pictureBox.x + "px; " +
+                                                "top : " + pictureBox.y + "px;\">\n";
 
             // place it
             //string img = "      <img src=\"" + this.ReplacementPicturePath + "\" style=\"position: absolute; " +
-            //                                                                            "TODO\"/>";
-            await FileIO.WriteTextAsync(this.htmlFile, img);
+            //                                                                            "\"/>";
+            await FileIO.AppendTextAsync(this.htmlFile, img);
+        }
+
+        private BoundingBox findPictureBoundaries(Region[] regions, bool pictureGoesOnTheLeft)
+        {
+            int minBoundary = (int) (0.2 * this.CardWidth); /* approx to remove lines that are close to border */
+            BoundingBox picBBox = new BoundingBox();
+            
+            // yuk, I know
+            if (pictureGoesOnTheLeft)
+            {
+                picBBox.x = 0;
+                picBBox.y = 0;
+                picBBox.Width = 0;
+            }
+            else
+            {
+                picBBox.x = this.CardWidth;
+                picBBox.y = 0;
+            }
+
+            BoundingBox bBox;
+
+            // Initially lowest point on card; will be modified in loop
+            // if ever there is some text under the picture
+            int bottomBoundary = CardHeight;
+
+            foreach (Region reg in regions)
+            {
+                foreach (Line line in reg.Lines)
+                {
+                    bBox = new BoundingBox(line.BoundingBox);
+                    // this makes me sick
+                    // 1. update picBBox.y (top) if bBox.x doesn't meet minBoundary requirement
+                    // 2. 
+                    if (pictureGoesOnTheLeft)
+                    {
+                        if (bBox.x < minBoundary) /* Assumption: Picture for sure doesn't span this line. Now, is this line over or under picture? */
+                        {
+                            if (bBox.y < (0.5 * this.CardHeight)) /* current line is within top half of card. Thus, lower y. */
+                            {
+                                picBBox.y = bBox.y + bBox.Height;
+                            }
+                            else
+                            {
+                                bottomBoundary = bBox.y; /* assume you're at bottom of where picture goes. */
+                                break; 
+                            }
+                        }
+                        else /* This is a good line - i.e. picture spans this line */ 
+                        {
+                            if (bBox.x < picBBox.Width) /* found a line that reduces possible boundary */
+                            {
+                                picBBox.Width = bBox.x;
+                            }
+                        }
+                    }
+                    else // picture is on the right
+                    {
+                    // TODO: ADAPT FOR RIGHT
+                        if ((this.CardWidth - bBox.x) < minBoundary) /* Assumption: Picture for sure doesn't span this line. Now, is this line over or under picture? */
+                        {
+                            if (bBox.y < (0.5 * this.CardHeight)) /* current line is within top half of card. Thus, lower y. */
+                            {
+                                picBBox.y = bBox.y + bBox.Height;
+                            }
+                            else
+                            {
+                                bottomBoundary = bBox.y; /* assume you're at bottom of where picture goes. */
+                                break;
+                            }
+                        }
+                        else /* This is a good line - i.e. picture spans this line */
+                        {
+                            if ((this.CardWidth - bBox.x) < picBBox.Width) /* found a line that reduces possible boundary */
+                            {
+                                picBBox.x = bBox.x;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // set width & height from what we discovered of x & y
+            picBBox.Height = bottomBoundary - picBBox.y;
+            if (!pictureGoesOnTheLeft)
+            {
+                picBBox.Width = this.CardWidth - picBBox.x;
+            }
+            return picBBox;
         }
 
         private bool isLeftmostRegion(Region[] regions, int targetIndex)
         {
-            // it's better for your mental health if you just stop reading here...
+            // it's probably best for your mental health if you just stop reading here...
             BoundingBox targetBBox = new BoundingBox(regions[targetIndex].BoundingBox);
             BoundingBox otherBBox;
             for (int i = 0; i < regions.Length; i++)
@@ -188,6 +279,8 @@ namespace MenuReader
             public int y { get; set; }
             public int Width { get; set; }
             public int Height { get; set; }
+
+            public BoundingBox() {}
 
             public BoundingBox(string box)
             {
