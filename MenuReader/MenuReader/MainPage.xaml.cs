@@ -102,8 +102,8 @@ namespace MenuReader
             HtmlPhoto.Source = htmlPhotoBitmap;
             htmlB = camera.getPhotoAsSoftwareBitmap();
 
-            HtmlGenerator gen = new HtmlGenerator(idPhoto, htmlB.PixelWidth, htmlB.PixelHeight, portraitPhoto);
-            gen.GenerateHtmlAsync();
+            //HtmlGenerator gen = new HtmlGenerator(idPhoto, htmlB.PixelWidth, htmlB.PixelHeight, portraitPhoto);
+            //gen.GenerateHtmlAsync();
             //TODO: Link Html software photo bitmap here
             //HtmlPhoto.Source = null;
             

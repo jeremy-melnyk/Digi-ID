@@ -13,7 +13,7 @@ namespace MenuReader
     {
         private StorageFile htmlFile;
 
-        public Stream ReplacementPicture { get; set; }
+        public string ReplacementPicturePath { get; set; }
         public Stream Card { get; set; }
 
         public int CardWidth { get; set; }
@@ -24,10 +24,10 @@ namespace MenuReader
         /// </summary>
         /// <param name="card">Card stream that will be OCR'd</param>
         /// <param name="replacementPicture">Picture to put as replacement in generated html.</param>
-        public HtmlGenerator(Stream card, int cardWidth, int cardHeight, Stream replacementPicture)
+        public HtmlGenerator(Stream card, int cardWidth, int cardHeight, string replacementPicturePath)
         {
             this.htmlFile = ApplicationData.Current.TemporaryFolder.CreateFileAsync("TEMP_HTML.html", CreationCollisionOption.ReplaceExisting).AsTask().Result;
-            this.ReplacementPicture = replacementPicture;
+            this.ReplacementPicturePath = replacementPicturePath;
             this.Card = card;
             this.CardWidth = cardWidth;
             this.CardHeight = cardHeight;
@@ -35,7 +35,7 @@ namespace MenuReader
 
         public async void GenerateHtmlAsync()
         {
-            if (htmlFile == null || Card == null || ReplacementPicture == null || CardHeight == 0 || CardWidth == 0)
+            if (htmlFile == null || Card == null || ReplacementPicturePath == null || CardHeight == 0 || CardWidth == 0)
             {
                 throw new MissingMemberException("File name, card or replacement picture not set.");
             }
@@ -96,7 +96,7 @@ namespace MenuReader
             await FileIO.AppendTextAsync(this.htmlFile, close);
 
             this.htmlFile = null;
-            this.ReplacementPicture = null;
+            this.ReplacementPicturePath = null;
             this.Card = null;
             this.CardWidth = 0;
             this.CardHeight = 0;
