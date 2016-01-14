@@ -39,7 +39,7 @@ namespace MenuReader
             {
                 throw new MissingMemberException("File name, card or replacement picture not set.");
             }
-            // TODO: Call private methods in appropriate order, using ImageReader to get OCR.
+
             Task t = initFileAsync();
             await t;
 
@@ -53,14 +53,15 @@ namespace MenuReader
                                                 "border: 1px solid black; border-radius: 10px; "+
                                                 "background-image: url('http://www.joycefdn.org/ar/2009/common/images/page/background/Generic_blue_background.jpg')\">\n";
             await FileIO.AppendTextAsync(this.htmlFile, wrapperDiv);
-            BoundaryBox bBox;
+            BoundingBox bBox;
+
             foreach (Region reg in results.Regions)
             {
                 foreach (Line line in reg.Lines)
                 {
                     foreach (Word word in line.Words)
                     {
-                        bBox = new BoundaryBox(word.BoundingBox);
+                        bBox = new BoundingBox(word.BoundingBox);
                         string htmlWord = "      <span style=\"position: absolute; " +
                                                         "left: " + bBox.x + "px; " +
                                                         "top: " + bBox.y + "px; " +
@@ -68,11 +69,11 @@ namespace MenuReader
                                                         "height: " + bBox.Height + "px; " +
                                                         "font-size: " + bBox.Height + "px;\">" + /* super-awesome hack */
                                                         word.Text + "</span>\n";
-                        await FileIO.AppendTextAsync(this.htmlFile, htmlWord);
+                        await FileIO.AppendTextAsync(this.htmlFile, htmlWord); /* aweful performance but whatever */
                     }
                 }
             }
-            // TODO: Add picture
+            await writeIdPicture(results.Regions);
             await FileIO.AppendTextAsync(this.htmlFile, "    </div>\n");
             t = endFileAsync();
             await t;
@@ -102,24 +103,93 @@ namespace MenuReader
             this.CardHeight = 0;
         }
 
-        private void writeEntity(CardEntity cardEntity)
+        private async Task writeIdPicture(Region[] regions)
         {
-            // TODO: convert entity to html span
+            int totalLeftLength = 0, totalRightLength = 0;
+            BoundingBox bBox;
+            for (int i = 0; i < regions.Length; i++)
+            {
+                if (isLeftmostRegion(regions, i))
+                {
+                    bBox = new BoundingBox(regions[i].BoundingBox);
+                    totalLeftLength += (bBox.x * bBox.Height);
+                }
+                if (isRightmostRegion(regions, i))
+                {
+                    bBox = new BoundingBox(regions[i].BoundingBox);
+                    totalRightLength += ((this.CardWidth - (bBox.x + bBox.Width)) * bBox.Height);
+                }
+            }
+
+            bool pictureGoesOnTheLeft = totalLeftLength > totalRightLength ? true : false;
+            string img;
+            if (pictureGoesOnTheLeft)
+            {
+                img = "<div>PICTURE GOES ON LEFT</div>";
+            }
+            else 
+            {
+                img = "<div>PICTURE GOES ON RIGHT</div>";
+            }
+            // TODO: find minimal box
+
+            // place it
+            //string img = "      <img src=\"" + this.ReplacementPicturePath + "\" style=\"position: absolute; " +
+            //                                                                            "TODO\"/>";
+            await FileIO.WriteTextAsync(this.htmlFile, img);
         }
 
-        private void writeIdPicture()
+        private bool isLeftmostRegion(Region[] regions, int targetIndex)
         {
-            // TODO: add picture to html with img tag
+            // it's better for your mental health if you just stop reading here...
+            BoundingBox targetBBox = new BoundingBox(regions[targetIndex].BoundingBox);
+            BoundingBox otherBBox;
+            for (int i = 0; i < regions.Length; i++)
+            {
+                if (i == targetIndex) continue;
+                otherBBox = new BoundingBox(regions[i].BoundingBox);
+                if (otherBBox.x < targetBBox.x && boxesOnSameLine(otherBBox, targetBBox))
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
-        private class BoundaryBox
+        private bool isRightmostRegion(Region[] regions, int targetIndex)
+        {
+            BoundingBox targetBBox = new BoundingBox(regions[targetIndex].BoundingBox);
+            BoundingBox otherBBox;
+            for (int i = 0; i < regions.Length; i++)
+            {
+                if (i == targetIndex) continue;
+                otherBBox = new BoundingBox(regions[i].BoundingBox);
+                if (otherBBox.x + otherBBox.Width > targetBBox.x + targetBBox.Width &&
+                    boxesOnSameLine(otherBBox, targetBBox)                    
+                   )
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private bool boxesOnSameLine(BoundingBox otherBBox, BoundingBox targetBBox)
+        {
+            return (
+                     (otherBBox.y > targetBBox.y && otherBBox.y < (targetBBox.y + targetBBox.Height)) ||
+                     (targetBBox.y > otherBBox.y && targetBBox.y < (otherBBox.y + otherBBox.Height))
+                    );
+        }
+
+        private class BoundingBox
         {
             public int x { get; set; }
             public int y { get; set; }
             public int Width { get; set; }
             public int Height { get; set; }
 
-            public BoundaryBox(string box)
+            public BoundingBox(string box)
             {
                 string[] splitStr = box.Split(new Char[] { ',' });
                 this.x = Int32.Parse(splitStr[0]);
