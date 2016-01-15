@@ -129,7 +129,7 @@ namespace MenuReader
 
             // TODO: find minimal box
             BoundingBox pictureBox = findPictureBoundaries(regions, pictureGoesOnTheLeft);
-            string img = "    <div style=\"position: absolute; " +
+            string imgWrapperDiv = "    <div style=\"position: absolute; " +
                                                 "width: " + pictureBox.Width + "px; " +
                                                 "height: " + pictureBox.Height + "px; " +
                                                 "border: 1px solid red; border-radius: 10px; " +
@@ -139,7 +139,7 @@ namespace MenuReader
             // place it
             //string img = "      <img src=\"" + this.ReplacementPicturePath + "\" style=\"position: absolute; " +
             //                                                                            "\"/>";
-            await FileIO.AppendTextAsync(this.htmlFile, img);
+            await FileIO.AppendTextAsync(this.htmlFile, imgWrapperDiv);
         }
 
         private BoundingBox findPictureBoundaries(Region[] regions, bool pictureGoesOnTheLeft)
@@ -158,6 +158,7 @@ namespace MenuReader
             {
                 picBBox.x = this.CardWidth;
                 picBBox.y = 0;
+                picBBox.Width = this.CardWidth;
             }
 
 
@@ -199,7 +200,7 @@ namespace MenuReader
                     }
                     else // picture is on the right
                     {
-                        if ((this.CardWidth - bBox.x) < minBoundary) /* Assumption: Picture for sure doesn't span this line. Now, is this line over or under picture? */
+                        if ((this.CardWidth - (bBox.x + bBox.Width)) < minBoundary) /* Assumption: Picture for sure doesn't span this line. Now, is this line over or under picture? */
                         {
                             if (bBox.y < (0.5 * this.CardHeight)) /* current line is within top half of card. Thus, lower y. */
                             {
@@ -213,9 +214,9 @@ namespace MenuReader
                         }
                         else /* This is a good line - i.e. picture spans this line */
                         {
-                            if ((this.CardWidth - bBox.x) < picBBox.Width) /* found a line that reduces possible boundary */
+                            if (bBox.x + bBox.Width > picBBox.x) /* found a line that reduces possible boundary */
                             {
-                                picBBox.x = bBox.x;
+                                picBBox.x = bBox.x + bBox.Width;
                             }
                         }
                     }
