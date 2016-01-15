@@ -75,7 +75,6 @@ namespace MenuReader
                 }
             }
             await writeIdPicture(results.Regions);
-            await FileIO.AppendTextAsync(this.htmlFile, "    </div>\n");
             t = endFileAsync();
             await t;
         }
@@ -132,14 +131,18 @@ namespace MenuReader
             string imgWrapperDiv = "    <div style=\"position: absolute; " +
                                                 "width: " + pictureBox.Width + "px; " +
                                                 "height: " + pictureBox.Height + "px; " +
-                                                "border: 1px solid red; border-radius: 10px; " +
                                                 "left: " + pictureBox.x + "px; " +
                                                 "top : " + pictureBox.y + "px;\">\n";
 
-            // place it
-            //string img = "      <img src=\"" + this.ReplacementPicturePath + "\" style=\"position: absolute; " +
-            //                                                                            "\"/>";
+            // place it. Margins are 15% of width/height
+            string img = "      <img src=\"" + this.ReplacementPicturePath + "\" style=\"position: absolute; " +
+                                                                                        "width: " + (0.7 * pictureBox.Width) + "px; " +
+                                                                                        "height: " + (0.7 * pictureBox.Height) + "px; " +
+                                                                                        "margin-left: " + (0.15 * pictureBox.Width) + "px; " +
+                                                                                        "margin-top: " + (0.15 * pictureBox.Height) + "px;\"/>";
             await FileIO.AppendTextAsync(this.htmlFile, imgWrapperDiv);
+            await FileIO.AppendTextAsync(this.htmlFile, img);
+            await FileIO.AppendTextAsync(this.htmlFile, "</div>\n");
         }
 
         private BoundingBox findPictureBoundaries(Region[] regions, bool pictureGoesOnTheLeft)
@@ -152,7 +155,7 @@ namespace MenuReader
             {
                 picBBox.x = 0;
                 picBBox.y = 0;
-                picBBox.Width = 0;
+                picBBox.Width = this.CardWidth;
             }
             else
             {
@@ -174,8 +177,6 @@ namespace MenuReader
                 {
                     bBox = new BoundingBox(line.BoundingBox);
                     // this makes me sick
-                    // 1. update picBBox.y (top) if bBox.x doesn't meet minBoundary requirement
-                    // 2. 
                     if (pictureGoesOnTheLeft)
                     {
                         if (bBox.x < minBoundary) /* Assumption: Picture for sure doesn't span this line. Now, is this line over or under picture? */
@@ -234,16 +235,18 @@ namespace MenuReader
 
         private bool isLeftmostRegion(Region[] regions, int targetIndex)
         {
-            // it's probably best for your mental health if you just stop reading here...
             BoundingBox targetBBox = new BoundingBox(regions[targetIndex].BoundingBox);
             BoundingBox otherBBox;
             for (int i = 0; i < regions.Length; i++)
             {
                 if (i == targetIndex) continue;
                 otherBBox = new BoundingBox(regions[i].BoundingBox);
-                if (otherBBox.x < targetBBox.x && boxesOnSameLine(otherBBox, targetBBox))
+                if (otherBBox.x < targetBBox.x)
                 {
-                    return false;
+                    if (boxesOnSameLine(otherBBox, targetBBox))
+                    {
+                        return targetBBox.Height > otherBBox.Height; /* If they overlap, take the one that takes the most space */
+                    }
                 }
             }
             return true;
@@ -257,11 +260,9 @@ namespace MenuReader
             {
                 if (i == targetIndex) continue;
                 otherBBox = new BoundingBox(regions[i].BoundingBox);
-                if (otherBBox.x + otherBBox.Width > targetBBox.x + targetBBox.Width &&
-                    boxesOnSameLine(otherBBox, targetBBox)                    
-                   )
+                if (otherBBox.x + otherBBox.Width > targetBBox.x + targetBBox.Width)
                 {
-                    return false;
+                    return targetBBox.Height > otherBBox.Height; /* If they overlap, take the one that takes the most space */
                 }
             }
             return true;
