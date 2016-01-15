@@ -159,7 +159,7 @@ namespace MenuReader
             }
             else
             {
-                picBBox.x = this.CardWidth;
+                picBBox.x = 0;
                 picBBox.y = 0;
                 picBBox.Width = this.CardWidth;
             }
